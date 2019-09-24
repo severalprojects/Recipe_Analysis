@@ -10,9 +10,10 @@ I wondered what kind of insight I could glean, or how I might choose recipes dif
 This project attempts to build a large data set of recipes for a single food, then allow a user to navigate it by looking at the ways in which elements in the data set converge or diverge from some kind of 'norm.' The backend is built in Python.  
 
 ## Current Status / Code Modules:## 
-*getRecipeLinks.py ### runs from the command line with arguments (foodname, num_results). For example, when you've downloaded the code and are in the correct directory, type "python meatloaf 100" to get generate a textfile with 100 unique links from the google search results for "meatloaf+recipe"* 
-*scrapeLinks.py 
-*ingParse.py 
+* **getRecipeLinks.py**  runs from the command line with arguments (foodname, num_results). For example, when you've downloaded the code and are in the correct directory, type "python meatloaf 100" to get generate a textfile with 100 unique links from the google search results for "meatloaf+recipe"* 
+* **scrapeLinks.py** 
+* **ingParse.py**
+
 ## Forthcoming: ##
 
 #Front end! Working on getting this online so that users can query the database I am constructing and visualize some of the results. 
