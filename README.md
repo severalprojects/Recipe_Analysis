@@ -24,6 +24,6 @@ This project attempts to build a large data set of recipes for a single food, th
 
 ## Forthcoming: ##
 
-#currently building MySQL database to store scraped data and an interface to continue to add data to the database over time. 
+* currently building MySQL database to store scraped data and an interface to continue to add data to the database over time. 
 
-#Front end! Working on getting this online so that users can query the database I am constructing and visualize some of the results. 
+* Front end! Working on getting this online so that users can query the database I am constructing and visualize some of the results. 
