@@ -24,6 +24,9 @@ This project attempts to build a large data set of recipes for a single food, th
 
 * **ingParse.py** has some helper methods to parse ingredients in some of the above code (for example, extracting numbers, rendering fractions as floating points, stripping out special/annoying characters, etc). 
 
+## Required Libraries: ##
+For headless webbrowsing, I'm using [Selenium](https://selenium-python.readthedocs.io/installation.html). For parsing HTML, I use [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/).
+
 ## Forthcoming: ##
 
 * currently building MySQL database to store scraped data and an interface to continue to add data to the database over time. 
