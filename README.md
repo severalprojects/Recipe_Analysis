@@ -16,7 +16,7 @@ This project attempts to build a large data set of recipes for a single food, th
 
 * **iAnalysis.py** Ingredient Analysis: takes the textfile output from scrapeLinks.py and attempts to standardize the ingredients. That is, it organizes all strings representing ingredients and uses various strategies to group ingredients. For example, it will designate "black pepper," "fresh cracked pepper," and "ground pepper" as the same ingredient. Then all recipes are stored in the same format, a list of python dictionaries with this structure: {"amt": numeric_quantity, "unit": unit_name; "name": ingredient_name"}. This code also runs preliminary analytics on the batch of recipes parsed, reporting the degree to which recipe ingredients have been consolodated and ordering ingredients by how often they appear in the batch of recipes.  
   
-...![screengrab of iAnalysis.py](iAnalysis.jpg)
+<p align="center"> ![screengrab of iAnalysis.py](iAnalysis.jpg) </p>
 
 ## Forthcoming: ##
 
