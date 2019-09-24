@@ -22,6 +22,8 @@ This project attempts to build a large data set of recipes for a single food, th
   
 <p align="center"> <img src="iAnalysis.jpg"> </p>
 
+* **ingParse.py** has some helper methods to parse ingredients in some of the above code (for example, extracting numbers, rendering fractions as floating points, stripping out special/annoying characters, etc). 
+
 ## Forthcoming: ##
 
 * currently building MySQL database to store scraped data and an interface to continue to add data to the database over time. 
