@@ -22,13 +22,13 @@ Generates two files, named "results" appended with a timestamp. ERROR_LOG shows 
 
 <p align="center"> <img src="scrapeLinks.jpg"> </p>
 
-* **iAnalysis.py** Ingredient Analysis: takes the textfile output from scrapeLinks.py and attempts to standardize the ingredients. That is, it organizes all strings representing ingredients and uses various strategies to group ingredients. For example, it will designate "black pepper," "fresh cracked pepper," and "ground pepper" as the same ingredient. Then all recipes are stored in the same format, a list of python dictionaries with this structure: {"amt": numeric_quantity, "unit": unit_name; "name": ingredient_name"}. This code also runs preliminary analytics on the batch of recipes parsed, reporting the degree to which recipe ingredients have been consolodated and ordering ingredients by how often they appear in the batch of recipes.  
+* **iAnalysis.py** Ingredient Analysis: takes the textfile output from scrapeLinks.py and attempts to standardize the ingredients. That is, it organizes all strings representing ingredients and uses various strategies to group ingredients. For example, it will designate "black pepper," "fresh cracked pepper," and "ground pepper" as the same ingredient. Then all recipes are stored in the same format, a list of python dictionaries with this structure: {"amt": numeric_quantity, "unit": unit_name; "name": ingredient_name"}. This code also runs preliminary analytics on the batch of recipes parsed, reporting the degree to which recipe ingredients have been consolodated and ordering ingredients by how often they appear in the batch of recipes. Takes a filepath argument, ie run "python3 iAnalysis.py data/scraped_cheesecake" 
 
 UPDATE: Added user correction option after automated ingredient consolidation. The consolidation of ingredient strings will always be imperfect, though I plan to incrementally add more involved analysis (NLP, ML, etc). For now, let's be humans and correct obvious errors... 
   
 <p align="center"> <img src="iAnalysis.jpg"> </p>
 
-* **load_recipes.py** takes the output (binary) file from ingParse.py and loads the recipes and ingredients into  SQL database (you can create the database/required tables by running the script **init_DB.py** with configuration setting that work on your end) 
+* **load_recipes.py** takes the output (binary) file from ingParse.py and loads the recipes and ingredients into  SQL database (you can create the database/required tables by running the script **init_DB.py** with configuration setting that work on your end). Takes a filepath argument, ie run "python3 load_recipes.py data/results_from_wherever" 
 
 * **ingParse.py** has some helper methods to parse ingredients in some of the above code (for example, extracting numbers, rendering fractions as floating points, stripping out special/annoying characters, etc). 
 
