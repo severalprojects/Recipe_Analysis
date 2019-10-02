@@ -28,9 +28,9 @@ UPDATE: Added user correction option after automated ingredient consolidation. T
   
 <p align="center"> <img src="iAnalysis.jpg"> </p>
 
-* **ingParse.py** has some helper methods to parse ingredients in some of the above code (for example, extracting numbers, rendering fractions as floating points, stripping out special/annoying characters, etc). 
-
 * **load_recipes.py** takes the output (binary) file from ingParse.py and loads the recipes and ingredients into  SQL database (you can create the database/required tables by running the script **init_DB.py** with configuration setting that work on your end) 
+
+* **ingParse.py** has some helper methods to parse ingredients in some of the above code (for example, extracting numbers, rendering fractions as floating points, stripping out special/annoying characters, etc). 
 
 ## Required Libraries: ##
 For headless webbrowsing, I'm using [Selenium](https://selenium-python.readthedocs.io/installation.html). For parsing HTML, I use [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/).
