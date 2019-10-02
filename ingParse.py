@@ -1,172 +1,34 @@
-#method to take a string and try to parse it as an ingredient entry [quantity, measuement, ingredient]
+############################################
+# JOE WINTER - Recipe Analysis
+#
+# Helper functions for parsing ingredient data. 
+# (try to) separate an arbitrary 'ingredient string' into 'amount', 'unit', and 'name'
+#
+############################################
 
 import re
 
-testlist = ['2/3 teaspoon sugar', '1/4 cup shortening', '1 large egg, room temperature', '1 teaspoon vanilla extract', '1/4 teaspoon salt', '1-1/2 cups all-purpose flour', '2 teaspoons baking powder', '1/2 cup whole milk', '1 cup heavy whipping cream, whipped', '1-1/2 quarts fresh or frozen strawberries, sliced']
-testlist2 = ['2/3 cup sugar', '1/4 cup shortening', '1/4 teaspoon salt', '1-1/2 cups all-purpose flour', '1/2 cup whole milk', '1-1/2 quarts fresh or frozen strawberries, sliced', '2 large things']
-testlist3 = ['1-1/2 pounds Ground Beef (93% lean or leaner)', '3/4 cup Panko bread crumbs', '3/4 cup ketchup, divided', '1/2 cup minced onion', '1 egg', '1 tablespoon Worcestershire sauce', '2 teaspoons minced garlic', '1 teaspoon dried thyme leaves', '3/4 teaspoon pepper', '1/2 teaspoon salt']
-testlist4 = ['2 lbs. lean ground beef', '1 cup Italian breadcrumbs', '2 eggs', '1/2 cup onion, diced', '2 tsp garlic powder', '2 tsp chopped parsley', '1 tsp salt', '1 tsp pepper', '1/2 cup bbq sauce']
-testlist5 =  ['1/2 teaspoon salt', '1 cup unsalted butter', '1 cup crunchy peanut butter', '1 cup white sugar', '1 cup packed brown sugar', '2 eggs', '2 1/2 cups all-purpose flour', '1 teaspoon baking powder', '1 1/2 teaspoons baking soda']
-testlist6 = ['1 tablespoon good olive oil', '3 cups chopped yellow onions (3 onions)', '1 teaspoon chopped fresh thyme leaves', '2 teaspoons kosher salt', '1 teaspoon freshly ground black pepper', '3 tablespoons Worcestershire sauce', '1/3 cup canned chicken stock or broth', '1 tablespoon tomato paste', '2 1/2 pounds ground chuck (81 percent lean)', '1/2 cup plain dry bread crumbs (recommended: Progresso)', '2 extra-large eggs, beaten', '1/2 cup ketchup (recommended: Heinz)']
+#dictionary to convert unicode fractionc characters to normal strings with ints and a slash
+fracTable = {'¼':' 1/4', '½': ' 1/2', '¾': ' 3/4', '⅛': ' 1/8', '⅓': ' 1/3', '⅔':' 2/3', '⅜':' 3/8'}
 
-fracTable = {'¼':'1/4', '½': '1/2', '¾': '3/4', '⅛': '1/8', '⅓': '1/3', '⅔':'2/3', '⅜':'3/8', '½':'1/2' }
-
-
-#####TO GET MORE FRACTIONS:
+##### NOTE2SELF: TO TO GET MORE FRACTIONS:
+# (in case we need to add more unicode fractions)
 # 
 # import unicodedata
 # unicodedata.lookup(vf + "THREE EIGHTHS")
 #
 ############################################
 
-
-def intIndices(theString): #returns the indices of positions in a string that hold integers
-    the_indices = []
-    index = 0
-    while index < len(theString):
-        intInList = index
-        try:
-            int(theString[index])
-            the_indices.append(intInList)
-            index += 1
-        except:
-            index +=1
-
-    
-    element = 0
-    rangeList = []
-    
-    while element < len(the_indices):
-        seqList = [element, element]
-        # print(seqList)
-        if element < len(the_indices):
-            if (element+1) < len(the_indices):
-                while the_indices[element+1] == the_indices[element] + 1:
-                    # print("{} equals {}".format(the_indices[element+1], the_indices[element] + 1))
-                    seqList[1] = element+1
-                    element +=1 
-                    if element+1 >= len(the_indices):
-                        break
-                rangeList.append(seqList)
-                # print("innerLoop")
-                # print(seqList)
-            else: 
-                rangeList.append(seqList)
-        element+=1       
-
-    numRanges = []
-    for item in rangeList:
-        # print("testing {}:{}".format(item[0], item[1]))
-        newRange = [the_indices[item[0]], the_indices[item[1]]+1]    
-        numRanges.append(newRange)      
-    # for item in the_indices:
-        # print("this is in the_indices:{}".format(item))   
-    return [the_indices, rangeList, numRanges]
-
-
-def getFractions(indices_list, theString):
-    fracList = []
-    ND_List = []
-    if len(indices_list) > 1: #make sure there's more than one integer in the string
-        for index in range(len(indices_list)-1):
-            if (indices_list[index][1] == (indices_list[index+1][0] - 1)) : #check if the last entry in the first integer is one place
-                                                                        #away from first entry in next integer
-                if theString[indices_list[index][1]] == "/":
-                    # print("detected a fraction: {}".format(theString[indices_list[index][0]: indices_list[index+1][1]]))
-                    fracList.append([indices_list[index][0], indices_list[index+1][1]])
-                    ND_List.append([indices_list[index], indices_list[index+1]]) #store fractions as pairs of lists of ranges
-    #return fracList   
-    return ND_List             
-
-          
-def getMixedFractions(int_indices, frac_indices, theString):
-    
-    if not frac_indices: # if we pass the function an empty list of fractions, do nothing. 
-        return int_indices
-    MF = [] #list to store mixed fractions (or just restore non-mixed fractions if they aren't)
-    MF_count = 0
-    
-    for interval in frac_indices:
-        MF.append(interval)
-        for element in int_indices:
-            if interval[0][0] == element[1] + 1:
-                #print("found a mixed fraction: {}".format(theString[element[0]:interval[1][1]]))
-                MF[MF_count].insert(0, element)
-        MF_count+=1
-    return MF
-
-def stripMixedFractions(MF_list, theString):
-    stringList = list(theString)
-    #print(stringList)
-    stripList = MF_list
-    #print(stripList)
-    stripList.reverse()
-    # print("the striplist: {}".format(stripList))
-    
-
-    #######block of code deletes ALL the numbers from the string########## yields some problems if there are multiple numbers in string
-    # for item in stripList:
-    #     #print("thestriplist: {}".format(stripList))
-    #     #print("the item: {}".format(item))
-    #     if len(stripList) == 1:
-    #         # print("item type: {}".format(type(item[0])))
-    #         try:
-                
-    #             del stringList[item[0]:item[-1]] 
-    #             #print("its an int")
-    #         except: 
-    #             del stringList[item[0][0]:item[-1][1]]
-    #     else: 
-    #         # print("try to delete stringList[{}:{}]".format(item[0][0],item[-1][1]))
-    #         try: 
-    #             del stringList[item[0][0]:item[-1][1]]
-    #         except: 
-    #             del stringList[item[0]:item[-1]]
-    ###########################################
-
-    ###this block of code assumes that the quantity is the first number that appears in the ingredient string. 
-    if stripList:
-        quantity = stripList[-1]
-        try:
-            del stringList[quantity[0][0]:quantity[-1][1]]
-                    #print("its an int")
-        except: 
-            del stringList[quantity[0]:quantity[-1]]
-        
-    
-    return ''.join(stringList)
-
-def pullFractions(theString):
-
-    fIndices = intIndices(theString)
-    #print(fIndices[2])
-    fractions = getFractions(fIndices[2], theString)
-    #print(fractions)
-   
-    if fIndices[2]:
-        mixedFractions = getMixedFractions(fIndices[2], fractions, theString) 
-    else:
-        # print("in the else")
-        mixedFractions = getMixedFractions(fIndices[1], fractions, theString) 
-
-    strippedString = stripMixedFractions(mixedFractions.copy(), theString.strip())
-    
-    #strip excess space created by deletion. 
-    pat = re.compile(r'\s+')
-    formatted_string = pat.sub(' ', strippedString)
-    
-    return([mixedFractions, formatted_string])
-
-
-####gotta convert wordpress dictionaries too! 
+####We use this if there are unicode fraction characters in a string 
 def convertSFractions(ingredientString):
     for item in fracTable.keys():
         if item in ingredientString:
             # print("{} became:".format(ingredientString))
-            ingredientString = ingredientString.replace(item, fracTable[item])
+            ingredientString = ' ' + ingredientString.replace(item, fracTable[item])
             # print(ingredientString)
     return ingredientString
 
+###special code for wordpress recipes already parsed as Dicts: they use a lot of unicode fraction characters
 def convertWPSFractions(wp_list):
     for ingDict in wp_list:
         for item in fracTable.keys():
@@ -177,57 +39,94 @@ def convertWPSFractions(wp_list):
                 # print(ingredientString)
     return wp_list
 
-def parseQuantity(ingredientString):
-    ingredientString = convertSFractions(ingredientString)
-    input = pullFractions(ingredientString) #function will return a list, separating numbers, then the string with numbers removed
-    
-    MF = input[0].copy()
-    parsedNums = []
-    for frac in MF:
-        entries = frac.copy()
+# slightly awkward function to try to parse the difference in the usage of the '-' character 
+# in various contexts, ie, 8-10 eggs vs 1-1/2 cups... 
+# right now guess its a range of quantities (and store the average of the endpoints of the rage)
+# if there's a '-' but no '/' character in the string
+def isRange(thestring):
+    if '/' in thestring:
+        return False
+    elif '-' or '–' in thestring:
+        newstring = thestring.replace('-', ' ')
+        newstring = newstring.replace('–', ' ')
+        numlist = newstring.split()
         
-        entries.reverse()
-        
-        #print("entries: {}".format(entries))
-        whole = 0
-        part = 0
-        if len(entries) == 3:
-            # print("thre entriess!")
-            whole += int(ingredientString[entries[2][0]:entries[2][1]])
-            #print(whole)
-            part = int(ingredientString[entries[1][0]:entries[1][1]])/int(ingredientString[entries[0][0]:entries[0][1]])
-        elif len(entries) == 2: 
-            try:
-                part = int(ingredientString[entries[1][0]:entries[1][1]])/int(ingredientString[entries[0][0]:entries[0][1]])
+
+        avg = 0
+        for item in numlist:
+            try: 
+                avg = avg + int(item)
             except:
-                whole = int(ingredientString[entries[1]]) 
-        elif (entries[0] - entries[1]) == 1:
-            #print("entries[0]: {}".format(entries[0]))
-            whole = int(ingredientString[entries[1]])    
+                continue
+        if len(numlist) > 1:
+           
+            return avg/len(numlist)
 
-        parsedNums.append(whole+part)
-    if parsedNums:
-        output = [parsedNums[0], input[1]]
+#method to extract the (numeric) quantiity in an ingredient string
+def extractQuantity(thestring):
+    #make sure we don't have extra whitespace:
+    thestring = convertSFractions(thestring)
+    sstring=thestring.strip()
+    # print(sstring)
+
+    #generate a string of same length that only contains numeric characters and the front slash
+    newstring = ''.join((ch if ch in '-–0123456789/' else ' ') for ch in sstring)
+    # print(newstring)
+
+    #replace spaces more than 2 with a not-likely-to-occur-randomly string
+    pat = re.compile('[ ]{2,}')
+    formatted_string = pat.sub('--splithere--', newstring)
+
+   
+    #split into the component parts
+    
+    numlist = formatted_string.split('--splithere--')
+    # print(numlist)
+
+    quantity = None    
+    
+    #make sure there were actually numbers in the string
+
+    #right now we assume the quanity is the first numerical element in the string, 
+    #but we get a list of all numbers here, and can revisit when we want to parse better. 
+
+    if len(numlist[0]) > 0 :
+       
+        Q_stripped_string = thestring.replace(numlist[0], '')
+        first_num = numlist[0]
+        #replace empty space character with plus operator
+        # so something like '1 1/2' becomes 1+1/2 
+        rangeavg = isRange(numlist[0])
+        if rangeavg:
+            quantity = rangeavg
+        
+        else: 
+            to_eval = first_num.replace(' ', '+')
+            to_eval = to_eval.replace('–', '+')
+            to_eval = to_eval.replace('-', '+')
+
+            # print(to_eval)
+
+            try: 
+                quantity = eval(to_eval)
+            except:
+                pass
+        
+    if quantity: 
+        return [quantity, Q_stripped_string.strip()]
+    
     else:
-        output = ["", input[1]]
+        return [False, thestring]
 
-    # if len(parsedNums) == 1:
-    #     output = [parsedNums[0], input[1]] 
-    # else: 
-    #     output = [parsedNums, input[1]]   
-    return output
-
-# print(parseQuantity("testing 1 1/2 cups flour"))
-#print(parseQuantity("2 or 3 eggs"))
-
+#method to extract the measure unit of an ingredient
 def parseMeasure(ingredientString):
     IS = ingredientString
-    measure_list = "whole, half, cup(s), cups, cup, can, cans, can(s), slice, slices, teaspoons, teaspoon, quart, quarts, tsps, tsps., tsp., tsp, tablespoons, tablespoon, tbs., tbs, tbsp., tbsp, dash, qts., qt., lbs., lbs, lb., lb, pound, pounds, grams, ounces, ounce, oz., oz, package, to taste".split(", ")
+    measure_list = "whole, half, cup(s), cups, cup, can, cans, can(s), slice, slices, teaspoons, teaspoon, quart, quarts, tsps, tsps., tsp., tsp, tablespoons, tablespoon, tbs., tbs, tbsp., tbsp, dash, qts., qt., lbs., lbs, lb., lb, pound, pounds, grams, ounces, ounce, oz., oz, package, packages, packet, packets, to taste".split(", ")
     ML = sorted(measure_list, key=len, reverse=True)
     for measure in ML:
       
         ##potential PROBLEM, what if measurewords are embedded in ingredient words. example: "pint" \in "pinto beans"
-        ##could solve this by getting the indxe 
+        ##could solve this by...
         mstring = measure+" " #add a space to make sure it's not embedded in something. 
         if mstring in ingredientString: #this returns the first measure the method detects
             # print(IS)
@@ -238,30 +137,26 @@ def parseMeasure(ingredientString):
     
     return ["NONE", IS]
 
+### Parse Ingredient List by chunking it into amount, unit, and ingredient name and outputting each
+## ingredient as a python dictionary with those keys
 def PIList(theList):
     ingredientList = []
     for item in theList:
-        parsedAMT = parseQuantity(item)
-        parsedUandI = parseMeasure(parsedAMT[1].strip()) #.strip()
-        # print("amt: {} | unit: {} | ingredient: {}".format(parsedAMT[0], parsedUandI[0], parsedUandI[1]))
-        ingDict = {'amt': parsedAMT[0], 'unit': parsedUandI[0] , 'name': parsedUandI[1].lower()}
+
+        Quantity_Parsed = extractQuantity(item)
+        Unit_Ing_Parsed = parseMeasure(Quantity_Parsed[1])
+
+        if Quantity_Parsed[0]:
+            quantity = Quantity_Parsed[0]
+        else:
+            quantity = "NONE"
+        
+        unit = Unit_Ing_Parsed[0]
+        name = Unit_Ing_Parsed[1]
+
+        ingDict = {'amt': quantity, 'unit': unit , 'name': name.lower()}
         ingredientList.append(ingDict)
+
+
     return ingredientList
 
-
-
-#
-# ingredientList = []
-
-# for item in testlist6:
-#     print(item)
-#     parsedAMT = parseQuantity(item)
-#     parsedUandI = parseMeasure(parsedAMT[1].strip()) #.strip()
-#     # print("amt: {} | unit: {} | ingredient: {}".format(parsedAMT[0], parsedUandI[0], parsedUandI[1]))
-#     ingDict = {'amt': parsedAMT[0], 'unit': parsedUandI[0] , 'name': parsedUandI[1]}
-#     ingredientList.append(ingDict)
-
-# print(ingredientList)
-
-
-# print(parseMeasure("cup applesauce"))
