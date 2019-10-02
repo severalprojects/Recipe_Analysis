@@ -15,6 +15,9 @@ from collections import defaultdict
 
 import ingParse as IP
 
+ingredient_groups = []
+
+nonIEntries = 0
 
 # noName = 0
 
@@ -72,107 +75,124 @@ def rules_and_exceptions(toMatch, item):
 
 def groupIngredients(iDicts): 
     
-
+    #code to remap ingredient groups goes here
     
-    for recipe in iDicts:
-        for ingredient in recipe:
-            if 'name' in ingredient.keys():
-                ingredient['name'] = ingredient['name'].strip()
-    
-    nameless=0
-    nonIngredEntries=0
-    
-    #make a set of unique ingredients // ie, this filters out already redundant strings (ie exact matches)
-    ingredientSet = set()
-    
-    for recipe in iDicts:
-        for ingredient in recipe:
-            try:    
-                ingredientSet.add(ingredient['name']) 
-            
-            except:
-                nameless +=1
-                print("nameless: {}".format(ingredient))
-                continue
-
-    #quick fix to pull out erroneous empty ingredient 
-    if '' in ingredientSet:
-        ingredientSet.remove('')
-
-    #sort by length
-    ingredient_list = sorted(list(ingredientSet), key = len)
-
-    numIG = len(ingredient_list)
-
-    print("initial consolidation shows {} distinct ingredient strings".format(numIG))
-
-    groups = []
-    ugroups = []
-    for toMatch in ingredient_list: #consider 'unique' ingredient strings, ordered from shortest to longest
+    #this block executes only the second time this function is called
+    #which is after user input adds a new group name to help consolidate 
+    #the ingredient list
+    if len(ingredient_groups) > 0:
+        for recipe in iDicts:
+            for ingredient in recipe:
+                if ingredient_groups[-1] in ingredient['name']:
+                    ingredient['gname'] = ingredient_groups[-1]
+                    ingredient['name'] = ingredient['name'].strip()
         
-        matches = []
-        toremove = []
-        syns = hasSynonyms(toMatch)
-        # syns = hasSynonyms(toMatch) #see if this ingredient has synonyms
-        for item in ingredientSet:
-            if toMatch in item: 
-                if rules_and_exceptions(toMatch, item):
-                    matches.append(item)
-                    toremove.append(item)
-            #check for tricky synonyms
-            elif syns: 
-                for term in syns:
-                    if term in item:
-                        # print("{} is a synonym for {}".format(item, toMatch))
+        
+        
+
+    else:
+        for recipe in iDicts:
+            for ingredient in recipe:
+                if 'name' in ingredient.keys():
+                    ingredient['name'] = ingredient['name'].strip()
+        
+        nameless=0
+        nonIngredEntries=0
+        
+        #make a set of unique ingredients // ie, this filters out already redundant strings (ie exact matches)
+        ingredientSet = set()
+        
+        for recipe in iDicts:
+            for ingredient in recipe:
+                try:    
+                    ingredientSet.add(ingredient['name']) 
+                
+                except:
+                    nameless +=1
+
+                    continue
+
+        #quick fix to pull out erroneous empty ingredients 
+        if '' in ingredientSet:
+            ingredientSet.remove('')
+        
+        if 'NONE' in ingredientSet:
+            ingredientSet.remove('NONE')
+
+        #sort by length
+        ingredient_list = sorted(list(ingredientSet), key = len)
+
+        numIG = len(ingredient_list)
+
+        print("initial consolidation shows {} distinct ingredient strings".format(numIG))
+
+        groups = []
+        ugroups = []
+        for toMatch in ingredient_list: #consider 'unique' ingredient strings, ordered from shortest to longest
+            
+            matches = []
+            toremove = []
+            syns = hasSynonyms(toMatch)
+            # syns = hasSynonyms(toMatch) #see if this ingredient has synonyms
+            for item in ingredientSet:
+                if toMatch in item: 
+                    if rules_and_exceptions(toMatch, item):
                         matches.append(item)
                         toremove.append(item)
-                        break #leave the loop if you've matched one synonym
-                
+                #check for tricky synonyms
+                elif syns: 
+                    for term in syns:
+                        if term in item:
+                            # print("{} is a synonym for {}".format(item, toMatch))
+                            matches.append(item)
+                            toremove.append(item)
+                            break #leave the loop if you've matched one synonym
+                    
 
-            # consolodated_IL.append(matches)       
+                # consolodated_IL.append(matches)       
 
-        #remove items that have been matched from the set so we don't keep trying to match them
-        
-        for item in toremove:
-            if item in ingredientSet: 
-                ingredientSet.remove(item)
+            #remove items that have been matched from the set so we don't keep trying to match them
+            
+            for item in toremove:
+                if item in ingredientSet: 
+                    ingredientSet.remove(item)
 
-        groups.append([matches, toMatch])
-        
+            groups.append([matches, toMatch])
+            
 
-    for item in groups:
-        if len(item[0]) > 0:
-            #earlier in the process 'NONE' is assigned to unfilled keys in dict. Don't want to treat 'NONE' as an ingredient to match
-            if item[1] is not 'NONE':
-                ugroups.append(item)
-   
-
-    totalIs = 0 
-    ugroups.sort(key=len)
-    for item in ugroups:
-        totalIs += len(item[0])
-        # print(item)
+        for item in groups:
+            if len(item[0]) > 0:
+                #earlier in the process 'NONE' is assigned to unfilled keys in dict. Don't want to treat 'NONE' as an ingredient to match
+                if item[1] is not 'NONE':
+                    ugroups.append(item)
     
-   
-    print("automatically grouped {} ingredient strings into {} distinct ingredients".format(totalIs, len(ugroups)))  
-   
-    # global noName 
-    # noName = nameless
-    # print(ugroups)
 
-    for group in ugroups:
-        #each list in ugroups is a pair with group[0] a list of elements being grouped together under the 'gname'
-        #stored in group[1]
+        totalIs = 0 
+        ugroups.sort(key=len)
+        for item in ugroups:
+            totalIs += len(item[0])
+            # print(item)
         
-        if len(group[0]) > 1: #scan through all the dictionaries in iDict and add 'gname' element: 
-            for string in group[0]:
-                for recipe in iDicts:
-                    for ingredient in recipe:
-                        if 'name' in ingredient.keys():
-                            if string == ingredient['name']:
-                                ingredient['gname'] = group[1].strip() 
+    
+        print("automatically grouped {} ingredient strings into {} distinct ingredients".format(totalIs, len(ugroups)))  
+    
+        # global noName 
+        # noName = nameless
+        # print(ugroups)
 
-   
+        for group in ugroups:
+            #each list in ugroups is a pair with group[0] a list of elements being grouped together under the 'gname'
+            #stored in group[1]
+            
+            if len(group[0]) > 1: #scan through all the dictionaries in iDict and add 'gname' element: 
+                for string in group[0]:
+                    for recipe in iDicts:
+                        for ingredient in recipe:
+                            if 'name' in ingredient.keys():
+                                if string == ingredient['name']:
+                                    ingredient['gname'] = group[1].strip() 
+
+    
     return iDicts
 
 #once groups are established, this method goes through the recipes and tallies how many recipes contain each unique ingredient
@@ -180,9 +200,10 @@ def groupIngredients(iDicts):
 #as seemingly unique ingredients are the first indicator of imperfect sorting/grouping
 
 def binIngredients():
+    global nonIEntries
     ingredientSet = set()
     nonameoramt = 0
-    nonIEntries = 0 
+     
 
     uniqueIngs = []
     recipeIndex = -1
@@ -225,10 +246,9 @@ def binIngredients():
     ingredientCounts = {}
 
 
-    #remove the suspicious (non) ingredients. later we can add user input to review if we want to toss these.y
+    #remove the suspicious (non) ingredients. later we can add user input to review if we want to toss these.
     for key in nonIngs:
         poplist = sorted(nonIngs[key], reverse=True)
-        print(poplist)
         for item in poplist:
             masterIGs[key].pop(item)
 
@@ -286,17 +306,12 @@ def binIngredients():
     print("AUTOMATED ingredient consolodation remains IMPERFECT.")
     toEdit = input("Do you want to leverage HUMAN INTELLIGENCE? y/n?\n".format(len(uniqueIngs)))
     if toEdit == "y":
-        editMode = input("type 'c' to change the name of an ingredient.\n")
-        # if editMode == 'u':
-        #     for item in uniqueIngs:
-        #         print(masterIGs[item[0]][item[1]])
-        #         editchoice = input("adjust this ingredient entry? y/n")
-        #         if editchoice == "n":
-        #             continue
-        #         elif editchoice == "y":
-        #             gname = input("add gname: ")
-        #             masterIGs[item[0]][item[1]]['gname'] = gname
-        #             print("revised ingredient entry: {}".format(masterIGs[item[0]][item[1]]))
+        editMode = input("Type \'c\' to change the name of an ingredient. Type \'g\' to make new group\n")
+        if editMode == 'g':
+            newgroup = input("add the name of a new group that will help consolidate ingredient list: \n")
+            ingredient_groups.append(newgroup)
+            groupIngredients(masterIGs)
+      
         if editMode == 'c':
             tochange = input("ingredient name you wish to change: \n")
             changeto = input("new name: \n")
