@@ -41,6 +41,9 @@ For headless webbrowsing, I'm using [Selenium](https://selenium-python.readthedo
 
 All other libraries should be part of standard python distribution(s). 
 
+## Currently: ##
+* Getting a handle on python's natural language tool kit (NLTK) library. After doing a bunch of my own "naive" string matching techniques to parse ingredients, this seems like the way forward. There are pros and cons to doing things with and without big black-box libraries... will try to find the middle path here. For the time being, added this fun script to the repo: **isthisafood.py** (requires nltk library to be installed). 
+
 ## Forthcoming: ##
 
 * Linking **iAnalysis.py** to the database so it gets "smarter." That is, as more recipes/ingredients (and their aliases) get added to the database, the program should get better at consolodating ingredients since it's 'seen' more synonyms for the same ingredient.  
