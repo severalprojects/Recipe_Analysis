@@ -1,5 +1,5 @@
 # Recipe_Analysis
-Building a Better Meatloaf... 
+Building a Better Meatloaf...one ingredient at a time.  
 
 ![I know how Jeanne Dielman feels...](splash.jpg)
 
